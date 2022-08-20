@@ -18,18 +18,22 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.http.HttpRequest
 import com.apollographql.apollo3.api.http.HttpResponse
 import com.apollographql.apollo3.network.http.HttpInterceptor
 import com.apollographql.apollo3.network.http.HttpInterceptorChain
 import com.example.graphqlsample.queries.GithubCommitQuery
 import com.example.raise_developer.FireStore.checkData
+import com.example.raise_developer.FireStore.db
 import com.example.raise_developer.FireStore.presentMoney
 import com.example.raise_developer.FireStore.sendjsonString
 import com.example.raise_developer.FireStore.tutorialCehck
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import java.lang.Runnable
 import kotlin.random.Random
 
@@ -219,20 +223,12 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
 
 //    깃허브 정보
     var githubContributionData: List<GithubCommitQuery.Week>? = null
-    fun getGithubContributionInfo(id: String?){
-        val token = BuildConfig.GITHUB_TOKEN
-        val apolloClient = ApolloClient.builder()
-            .addHttpInterceptor(AuthorizationInterceptor("${token}"))
-            .serverUrl("https://api.github.com/graphql")
-            .build()
+    val token = BuildConfig.GITHUB_TOKEN
+    val apolloClient = ApolloClient.builder()
+        .addHttpInterceptor(AuthorizationInterceptor("${token}"))
+        .serverUrl("https://api.github.com/graphql")
+        .build()
 
-        lifecycleScope.launchWhenResumed {
-            val response = apolloClient.query(GithubCommitQuery("${id}")).execute()
-            //바인드 서비스로 깃허브 정보 데이터 전달
-            githubContributionData = response.data?.user?.contributionsCollection?.contributionCalendar?.weeks
-            myService?.githubInfoMainActivityToService(response.data?.user?.contributionsCollection?.contributionCalendar?.weeks)
-        }
-    }
     inner class AuthorizationInterceptor(val token: String) : HttpInterceptor {
         override suspend fun intercept(
             request: HttpRequest,
@@ -247,7 +243,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     //잔디 관련
     var grassMoney = 0
     lateinit var grassPref: SharedPreferences
-    lateinit var editor: SharedPreferences.Editor
+    lateinit var grassPrefEditor: SharedPreferences.Editor
     lateinit var getResultText: ActivityResultLauncher<Intent>
     fun setActivityResultInit(){
         getResultText = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
@@ -294,7 +290,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
                                         target = characterNoteMark
                                         start()
                                     }
-//
                             }
                         })
                         start()
@@ -305,53 +300,28 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         }
     }
     fun soundDirectorCharacterMove(imageName: String, characName: String,  purchaseCheck: Boolean) {
-        Log.d("sounddirec","실행됨")
         if(!purchaseCheck){
-            Log.d("sounddirec","if문")
-            val frameLayout = findViewById<FrameLayout>(R.id.main_page_character_frame_layout)
-            val characterView = layoutInflater.inflate(R.layout.main_page_character_view, frameLayout, false)
-            //캐릭터 커스텀뷰 내의 뷰들
-            val character = characterView.findViewById<LinearLayout>(R.id.character_linear_layout)
-            val characterImage = characterView.findViewById<ImageView>(R.id.character_image)
-            val characterName = characterView.findViewById<TextView>(R.id.character_name)
+            val character = findViewById<LinearLayout>(R.id.main_page_sound_director)
+            val characterName = findViewById<TextView>(R.id.main_page_sound_director_name)
+            val characterImage = findViewById<ImageView>(R.id.main_page_sound_director_image_view)
             val id = resources.getIdentifier(imageName, "mipmap", packageName)
             characterImage.setImageResource(id)
             val subString1 = characName.substring(0 until characName.length/2)
             val subString2 = characName.substring(characName.length/2 until characName.length)
             characterName.text = "${subString1}\n${subString2}"
-            ObjectAnimator.ofFloat(character, "translationY", -650f).apply { // y축 이동
-                duration = 700
-                interpolator = LinearInterpolator()
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) { // 애니메이션이 종료되었을 때
-
-                        ObjectAnimator.ofFloat(character, "translationX", 300f).apply { // x축 이동
-                            duration = 700
-                            interpolator = LinearInterpolator()
-                            addListener(object : AnimatorListenerAdapter() {
-
-                                override fun onAnimationEnd(animation: Animator?) { // 애니메이션이 종료되었을 때때
-                                    val pianoNoteMark = findViewById<ImageView>(R.id.piano_music_note)
-                                    pianoNoteMark.visibility = View.VISIBLE
-                                    ObjectAnimator.ofFloat(pianoNoteMark, "translationY", 15f)
-                                        .apply { // x축 이동
-                                            duration = 800
-                                            repeatCount = ValueAnimator.INFINITE
-                                            repeatMode = ValueAnimator.REVERSE
-                                            myService?.musicStart()
-                                            start()
-                                        }
-                                }
-                            })
-                            start()
-                        }
-                    }
-                })
-                start()
+            character.visibility = View.VISIBLE
+            val pianoNoteMark = findViewById<ImageView>(R.id.piano_music_note)
+            pianoNoteMark.visibility = View.VISIBLE
+            ObjectAnimator.ofFloat(pianoNoteMark, "translationY", 15f)
+                .apply { // x축 이동
+                    duration = 800
+                    repeatCount = ValueAnimator.INFINITE
+                    repeatMode = ValueAnimator.REVERSE
+                    myService?.musicStart()
+                    start()
+                }
             }
-            frameLayout.addView(characterView)
         }
-    }
 
     fun loadSavedCharacterAndMove(){
         InventoryDialog.prefs = PreferenceInventory(this)
@@ -363,16 +333,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         for (index in 0 until employ.size){
             if (employName[index] == "힙합에 푹 빠진 사운드 디렉터"){
                 Log.d("loadsavedch","if문")
-                val characterView = layoutInflater.inflate(R.layout.main_page_character_view, frameLayout, false)
-                //캐릭터 커스텀뷰 내의 뷰들
-                val character = characterView.findViewById<LinearLayout>(R.id.character_linear_layout)
-                val characterImage = characterView.findViewById<ImageView>(R.id.character_image)
-                val characterName = characterView.findViewById<TextView>(R.id.character_name)
-                val id = resources.getIdentifier(employ[index], "mipmap", packageName)
-                characterImage.setImageResource(id)
-                val subString1 = employName[index].substring(0 until employName[index].length/2)
-                val subString2 = employName[index].substring(employName[index].length/2 until employName[index].length)
-                characterName.text = "${subString1}\n${subString2}"
                 soundDirectorCharacterMove(employ[index], "힙합에 푹 빠진 사운드 디렉터", false)
             }
             else{
@@ -394,11 +354,9 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
 
                 val thread = Thread(AnimationThread(character))
                 thread.start()
-
                 frameLayout.addView(characterView)
             }
-            }
-
+        }
     }
 
     fun addCharacterAndMove(imageName: String, purchaseCheck: Boolean, characName: String) {
@@ -544,9 +502,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         soundId = soundPool.load(this, R.raw.typing_sound, 1)
     }
 
-    var userID="test qwe123rqw"
-    var money = personalMoney.toString()
-    var presentLV=0
 
     // 서비스
     var myService : MyService? = null
@@ -557,8 +512,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             val b = p1 as MyService.LocalBinder
             myService = b.getService()
             isConService = true
-            val id = intent.getStringExtra("userId") // 로그인 페이지로부터 유저 아이디 받아오기
-            getGithubContributionInfo(id)
+            myService?.githubInfoMainActivityToService(githubContributionData)
         }
 
         override fun onServiceDisconnected(p0: ComponentName?) {
@@ -647,18 +601,20 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             val optionDialog = OptionDialog(email!!)
             optionDialog.setBgmOnButtonEvent(object : OptionDialog.BgmOnButtonClickListener {
                 override fun bgmOnButtonEvent() {
+                    val soundDirector = findViewById<LinearLayout>(R.id.main_page_sound_director)
                     val pianoNoteMark = findViewById<ImageView>(R.id.piano_music_note)
+                    soundDirector.visibility = View.VISIBLE
                     pianoNoteMark.visibility = View.VISIBLE
                     myService?.musicStart()
-
                 }
             })
             optionDialog.setBgmOffButtonEvent(object: OptionDialog.BgmOffButtonClickListener{
                 override fun bgmOffButtonEvent() {
+                    val soundDirector = findViewById<LinearLayout>(R.id.main_page_sound_director)
                     val pianoNoteMark = findViewById<ImageView>(R.id.piano_music_note)
+                    soundDirector.visibility = View.INVISIBLE
                     pianoNoteMark.visibility = View.INVISIBLE
                     myService?.musicStop()
-
                 }
             })
             optionDialog.setSoundEffectOnButtonEvent(object: OptionDialog.SoundEffectOnButtonClickListener{
@@ -743,136 +699,108 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             pIDialog.show(supportFragmentManager, "personalInformationDialog")
         }
     }
+    //파이어 스토어 함수
+    var userID="test qwe123rqw"
+    var money = personalMoney.toString()
+    var presentLV=0
+    suspend fun checkData(userId: String): DocumentSnapshot? {
+        Log.d("체크데이터", "실행")
+        return try {
+            val data = db.collection("user").document(userId)   // 작업할 컬렉션
+                .get()   // 문서 가져오기
+                .await()
+            Log.d("체크데이터","${data.data}")
+            data
+        } catch (e: Exception) {
+            Log.d("checkdata0","실패")
+            null
+        }
+    }
+
+    suspend fun setData(userId: String) {
+        val jsonString = ""
+        val level = "1"
+        val user = hashMapOf(
+            "uID" to userId,
+            "money" to money,
+            "level" to level,
+            "jsonString" to jsonString
+        )
+        db.collection("user").document(userId).set(
+            user
+        ).await()
+        tutorialCehck = true
+        prefs.prefs.edit().clear().apply()
+    }
+
+    fun readData(data: DocumentSnapshot, prefs: SharedPreferences, userId: String) {
+        var jsonData = ""
+        var level = ""
+        var dataSet = data.data.toString().split("uID=")[1].split(",")
+        var presentId = dataSet[0]
+        var jsonDataSet = data.data.toString().split("uID=")[1].split("jsonString=")
+        var jsonChanger = jsonDataSet[1].split("}]}")
+        if (presentId == userId) {
+            if (jsonChanger[0] != "}") {
+                jsonData =
+                    jsonChanger[0] + "}]}"
+            }
+            level = dataSet[2].replace("\\s".toRegex(), "").split("=")[1]
+            presentMoney = dataSet[1].replace("\\s".toRegex(), "").split("=")[1]
+        }
+        prefs.edit().putString("inventory", jsonData).apply()
+        prefs.edit().putString("money", presentMoney).apply()
+        prefs.edit().putString("level", level).apply()
+        val user = hashMapOf(
+            "money" to money,
+            "level" to level,
+            "jsonString" to jsonData
+        )
+        db.collection("user").document(userId).update(user as Map<String, Any>)
+    }
 
     //생명주기
     override fun onStart() {
         super.onStart()
-        quizTimeThread = Thread(QuizTimer())
-        quizTimeThread.start()
-        annualMoneyThread = Thread(AnnualMoneyThread())
-        annualMoneyThread.start()
+
         isThreadStop = false
         isAnimationThreadStop = false
         setTypingSound()
-        serviceBind()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startService(Intent(this, LifecycleService::class.java))
-        startService(Intent(this, LifecycleService::class.java))
         val id = intent.getStringExtra("userId") // 로그인 페이지로부터 유저 아이디 받아오기
-        userID = id.toString()
-         startService(Intent(this, LifecycleService::class.java))
-        setContentView(R.layout.main_page)
-        initEvent()
-        mainCharacterMove(470f, -550f)
         userID = id!!
         prefs = PreferenceInventory(this)
         CoroutineScope(Dispatchers.Main).launch {
-            Log.d("체크데이터", "실행")
-            CoroutineScope(Dispatchers.Main).launch {
-                var data = FireStore.db.collection("user").document(userID).get()// 작업할 컬렉션
-                val dataFirst = async {
-                    data = FireStore.db.collection("user").document(userID)   // 작업할 컬렉션
-                        .get()   // 문서 가져오기
+            Log.d("tlwkr","시작")
+            //깃허브 정보 받아오기
+            val githubResponse: Deferred<ApolloResponse<GithubCommitQuery.Data>> =
+                async {
+                    apolloClient.query(GithubCommitQuery(userID))
+                        .execute()
                 }
-                dataFirst.await()
-                val dataSecond = async {
-                    data.addOnSuccessListener { result ->
-                        Log.d("테스트데이터", result.data.toString())
-                        if (result.data == null) {
-                            val jsonString = ""
-                            val level = "1"
-                            val user = hashMapOf(
-                                "uID" to userID,
-                                "money" to money,
-                                "level" to level,
-                                "jsonString" to jsonString
-                            )
-                            FireStore.db.collection("user").document(userID).set(
-                                user
-                            )
-                            tutorialCehck = true
-                            Log.d("체크데이터", "새로만듬")
-                            prefs.prefs.edit().clear().apply()
-                        } else {
-                            CoroutineScope(Dispatchers.Main).launch {
-                                val dataSecond_2 = async {
-                                    data.addOnSuccessListener { result ->
-                                        Log.d("리드", "성공")
-                                        Log.d("리드데이터셋", result.data.toString())
-                                        var dataSet =
-                                            result.data.toString().split("uID=")[1].split(",")
-                                        var presentId = dataSet[0]
-                                        Log.d("qwe", dataSet.toString())
-                                        Log.d("qwe", dataSet[2])
-                                        var jsonDataSet =
-                                            result.data.toString()
-                                                .split("uID=")[1].split("jsonString=")
-                                        Log.d("qwe", jsonDataSet[1])
-                                        var jsonChanger = jsonDataSet[1].split("}]}")
-                                        Log.d("1", jsonChanger[0])
-                                        if (presentId == userID) {
-                                            if (jsonChanger[0] != "}") {
-                                                FireStore.jsonData =
-                                                    jsonChanger[0] + "}]}"
-                                            }
-                                            FireStore.level =
-                                                dataSet[2].replace("\\s".toRegex(), "")
-                                                    .split("=")[1]
-                                            presentMoney =
-                                                dataSet[1].replace("\\s".toRegex(), "")
-                                                    .split("=")[1]
-                                        }
-                                        Log.d("저장", "돈 ${presentMoney} , 레벨 ${FireStore.level}")
-                                        prefs.prefs.edit()
-                                            .putString("inventory", FireStore.jsonData)
-                                            .apply()
-                                        prefs.prefs.edit().putString("money", presentMoney).apply()
-                                        prefs.prefs.edit().putString("level", FireStore.level)
-                                            .apply()
-                                        val user = hashMapOf(
-                                            "money" to presentMoney,
-                                            "level" to FireStore.level,
-                                            "jsonString" to FireStore.jsonData
-                                        )
-                                        FireStore.db.collection("user").document(userID)
-                                            .update(user as Map<String, Any>)
-                                        Log.d("코루틴 테스트", "5")
-                                    }
-                                }
-                                    data.addOnFailureListener { exception ->
-                                            // 실패할 경우
-                                            Log.d("리드", "Error getting documents: $exception")
-                                        }
-                                dataSecond_2.await()
-                                setContentView(R.layout.main_page)
-                                Log.d("화면","화면실행")
-                                if (tutorialCehck) {
-                                    val tutorialDialog = TutorialDialog()
-                                    tutorialDialog.show(supportFragmentManager, "optionDialog")
-                                    tutorialCehck=false
-                                }
-                                if (presentMoney=="") {
-                                    presentMoney="0"
-                                }
-                                setMoneyText((presentMoney.toInt() + personalMoney).toString())
-                                setLevelText(FireStore.level)
-                                initEvent()
-                                mainCharacterMove(470f, -550f)
-                                val thread = Thread(PlayTime())
-                                thread.start()
-                                grassPref = getSharedPreferences("fragmentPlayTime", 0)
-                                editor = grassPref.edit()
-                                loadSavedCharacterAndMove()
-                            }
-                        }
-                    }
-                }
-                dataSecond.await()
+            githubContributionData =
+                githubResponse.await().data?.user?.contributionsCollection?.contributionCalendar?.weeks
+            Log.d("깃허브","끝")
+            // 서비스 바인드
+            val bindSer = async { serviceBind() }
+            bindSer.await()
+            Log.d("바인드","끝")
+
+            //파이어스토어 정보 받아오기
+            val checkData = checkData(userID)
+            if (checkData?.data == null){
+                setData(userID)
             }
-            loadSavedCharacterAndMove()
+            else {
+                readData(checkData, prefs.prefs, userID)
+            }
+            Log.d("파아ㅣ어스토어","끝")
+            setContentView(R.layout.main_page)
+
             if (tutorialCehck) {
                 val tutorialDialog = TutorialDialog()
                 tutorialDialog.show(supportFragmentManager, "optionDialog")
@@ -883,10 +811,26 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             }
             setMoneyText((presentMoney.toInt() + personalMoney).toString())
             setLevelText(FireStore.level)
-        }
-        setActivityResultInit()
+            initEvent()
+            mainCharacterMove(470f, -550f)
+            loadSavedCharacterAndMove()
 
-    }
+            // 각 쓰레드 생성 및 시작
+            quizTimeThread = Thread(QuizTimer())
+            quizTimeThread.start()
+
+            annualMoneyThread = Thread(AnnualMoneyThread())
+            annualMoneyThread.start()
+
+            val thread = Thread(PlayTime())
+            thread.start()
+            }
+        // 잔디 프리퍼런스 초기화
+        grassPref = getSharedPreferences("fragmentPlayTime", 0)
+        grassPrefEditor = grassPref.edit()
+
+        setActivityResultInit()
+        }
 
     override fun onResume() {
         super.onResume()
@@ -896,7 +840,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
 
     override fun onStop() {
         super.onStop()
-        serviceUnBind()
         Log.d("activity","onstop")
 
     }
@@ -904,9 +847,10 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     override fun onDestroy() {
         super.onDestroy()
         Log.d("activity","destory")
+        serviceUnBind()
         isThreadStop = true
         isAnimationThreadStop = true
-        editor.clear().apply()
+        grassPrefEditor.clear().apply()
         money=personalMoney.toString()
         Log.d("현재머니",money)
         presentLV=userLv

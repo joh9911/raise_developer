@@ -22,15 +22,16 @@
             android:src="@drawable/ic_baseline_music_note_24"
             android:layout_gravity="center"
             android:visibility="invisible"/>
+
         <TextView
             android:id="@+id/character_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="조성민"
-            android:textSize="13dp"
+            android:layout_gravity="center"
             android:gravity="center"
+            android:text="조성민"
             android:textColor="@color/black"
-            android:layout_gravity="center"/>
+            android:textSize="13dp" />
         <ImageView
             android:id="@+id/character_image"
             android:layout_width="39dp"

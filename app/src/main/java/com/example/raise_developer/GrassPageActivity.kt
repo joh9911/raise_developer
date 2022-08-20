@@ -62,12 +62,16 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
         findViewById<ImageView>(R.id.imageView3).setOnClickListener {
         }
         CoroutineScope(Dispatchers.Main).launch {
+            Log.d("tlwkr","시작")
             val bindSer = async { serviceBind() }
             bindSer.await()
+            Log.d("바인드실행","시작")
             val getGithubData = async{githubData = myService?.githubInfoServiceToGrassPage()}
             getGithubData.await()
+            Log.d("깃허브","시작")
             val divide = async { divideGithubDataInfo() }
             divide.await()
+            Log.d("깃허브","나누기")
         }
     }
 
