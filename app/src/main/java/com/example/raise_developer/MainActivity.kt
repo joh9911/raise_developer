@@ -764,7 +764,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         prefs.edit().putString("money", presentMoney).apply()
         prefs.edit().putString("level", level).apply()
         val user = hashMapOf(
-            "money" to money,
+            "money" to presentMoney,
             "level" to level,
             "jsonString" to jsonData
         )

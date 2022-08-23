@@ -7,6 +7,8 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.apollographql.apollo3.api.ApolloResponse
+import com.example.graphqlsample.queries.GithubCommitQuery
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.*
@@ -14,6 +16,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.oAuthCredential
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
 class LoginActivity: AppCompatActivity() {
@@ -22,9 +25,16 @@ class LoginActivity: AppCompatActivity() {
 
     val auth = Firebase.auth
     //파이어 스토어 함수
-    var userID="test qwe123rqw"
-    var money = 1000.toString()
     var presentLV=0
+    var jsonData = ""
+    var level = ""
+    var presentMoney = ""
+    var tutorialCehck = false
+
+    companion object {
+        lateinit var prefs: PreferenceInventory
+    }
+
     suspend fun checkData(userId: String): DocumentSnapshot? {
         Log.d("체크데이터", "실행")
         return try {
@@ -40,19 +50,17 @@ class LoginActivity: AppCompatActivity() {
     }
 
     suspend fun setData(userId: String) {
-        val jsonString = ""
-        val level = "1"
         val user = hashMapOf(
             "uID" to userId,
-            "money" to money,
-            "level" to level,
-            "jsonString" to jsonString
+            "money" to "",
+            "level" to "1",
+            "jsonString" to ""
         )
         FireStore.db.collection("user").document(userId).set(
             user
         ).await()
         FireStore.tutorialCehck = true
-        MainActivity.prefs.prefs.edit().clear().apply()
+        prefs.prefs.edit().clear().apply()
     }
 
     fun readData(data: DocumentSnapshot, prefs: SharedPreferences, userId: String) {
@@ -74,7 +82,7 @@ class LoginActivity: AppCompatActivity() {
         prefs.edit().putString("money", FireStore.presentMoney).apply()
         prefs.edit().putString("level", level).apply()
         val user = hashMapOf(
-            "money" to money,
+            "money" to presentMoney,
             "level" to level,
             "jsonString" to jsonData
         )
@@ -98,14 +106,25 @@ class LoginActivity: AppCompatActivity() {
                             authResult -> auth.signInWithCredential(authResult.credential!!)
                         .addOnCompleteListener(this@LoginActivity) {task ->
                             if(task.isSuccessful) {
-                                val user = Firebase.auth.currentUser?.email
+                                val userEmail = Firebase.auth.currentUser?.email
                                 val userId = authResult.additionalUserInfo?.username.toString() // 유저의 아이디
-                                Log.d("if Login success", userId)
-                                val intent= Intent(this,MainActivity::class.java)
-                                intent.putExtra("userEmail",user)
-                                intent.putExtra("userId",userId) // 유저 아이디 전달
-                                startActivity(intent)
-                                finish()
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    //파이어스토어 정보 받아오기
+                                    val checkData = checkData(userId)
+                                    if (checkData?.data == null) {
+                                        setData(userId)
+                                    } else {
+                                        readData(checkData, prefs.prefs, userId)
+                                    }
+
+                                    Log.d("if Login success", userId)
+                                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                                    intent.putExtra("userEmail", userEmail)
+                                    intent.putExtra("userId", userId) // 유저 아이디 전달
+                                    intent.putExtra("tutorialCheck",tutorialCehck)
+                                    startActivity(intent)
+                                    finish()
+                                }
                             }
                             else {
                                 Toast.makeText(this,"깃허브 로그인 실패", Toast.LENGTH_LONG).show()}
