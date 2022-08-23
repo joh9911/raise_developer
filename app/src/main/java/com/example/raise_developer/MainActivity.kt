@@ -795,6 +795,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
                 }
             githubContributionData =
                 githubResponse.await().data?.user?.contributionsCollection?.contributionCalendar?.weeks
+
             Log.d("깃허브","끝")
             // 서비스 바인드
             serviceBind()
