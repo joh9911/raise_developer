@@ -299,6 +299,18 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             start()
         }
     }
+    fun getDeviceDpi(): Int { // 현재 dpi 구하는 함수
+        val density = resources.displayMetrics.density
+        val result = when {
+            density >= 4.0 -> 640 // "xxxhdpi"
+            density >= 3.0 -> 480 // "xxhdpi"
+            density >= 2.0 -> 320 // "xhdpi"
+            density >= 1.5 -> 240 // "hdpi"
+            density >= 1.0 -> 160 // "mdpi"
+            else -> 120 // "ldpi"
+        }
+        return result
+    }
     fun soundDirectorCharacterMove(imageName: String, characName: String,  purchaseCheck: Boolean) {
         if(!purchaseCheck){
             val character = findViewById<LinearLayout>(R.id.main_page_sound_director)
@@ -762,7 +774,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     //생명주기
     override fun onStart() {
         super.onStart()
-
         isThreadStop = false
         isAnimationThreadStop = false
         setTypingSound()
@@ -786,9 +797,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
                 githubResponse.await().data?.user?.contributionsCollection?.contributionCalendar?.weeks
             Log.d("깃허브","끝")
             // 서비스 바인드
-            val bindSer = async { serviceBind() }
-            bindSer.await()
-            Log.d("바인드","끝")
+            serviceBind()
 
             //파이어스토어 정보 받아오기
             val checkData = checkData(userID)
@@ -850,6 +859,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         serviceUnBind()
         isThreadStop = true
         isAnimationThreadStop = true
+
         grassPrefEditor.clear().apply()
         money=personalMoney.toString()
         Log.d("현재머니",money)
