@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -98,6 +100,9 @@ class LoginActivity: AppCompatActivity() {
     fun initEvent(){
 //        로그인버튼
         val loginBtn=findViewById<TextView>(R.id.login_btn)
+        val progressBar = findViewById<ProgressBar>(R.id.login_page_progrss_bar)
+        val continueBtn = findViewById<TextView>(R.id.continue_btn)
+        progressBar.max = 100
         loginBtn.setOnClickListener{
 
             auth.startActivityForSignInWithProvider(this, provider.build())
@@ -106,6 +111,8 @@ class LoginActivity: AppCompatActivity() {
                             authResult -> auth.signInWithCredential(authResult.credential!!)
                         .addOnCompleteListener(this@LoginActivity) {task ->
                             if(task.isSuccessful) {
+                                loginBtn.visibility = View.INVISIBLE
+                                progressBar.visibility = View.VISIBLE
                                 val userEmail = Firebase.auth.currentUser?.email
                                 val userId = authResult.additionalUserInfo?.username.toString() // 유저의 아이디
                                 CoroutineScope(Dispatchers.Main).launch {
@@ -115,6 +122,7 @@ class LoginActivity: AppCompatActivity() {
                                         setData(userId)
                                     } else {
                                         readData(checkData, prefs.prefs, userId)
+
                                     }
 
                                     Log.d("if Login success", userId)
