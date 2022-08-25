@@ -728,43 +728,39 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.main_page)
         startService(Intent(this, LifecycleService::class.java))
         userId = intent.getStringExtra("userId")!!
         prefs = PreferenceInventory(this)
-        CoroutineScope(Dispatchers.Main).launch {
-            // 서비스 바인드
-            serviceBind()
-            Log.d("서비스 실행","ㅎ")
-            setContentView(R.layout.main_page)
-            val tutorialCheck = intent.getBooleanExtra("tutorialCheck",false)
-            var presentMoney = intent.getStringExtra("presentMoney")
-            val level = intent.getStringExtra("level")
+        serviceBind()
 
-            if (tutorialCheck) {
-                val tutorialDialog = TutorialDialog()
-                tutorialDialog.show(supportFragmentManager, "optionDialog")
-            }
+        val tutorialCheck = intent.getBooleanExtra("tutorialCheck",false)
+        var presentMoney = intent.getStringExtra("presentMoney")
+        val level = intent.getStringExtra("level")
 
-            if (presentMoney=="") {
-                presentMoney="0"
-            }
+        if (tutorialCheck) {
+            val tutorialDialog = TutorialDialog()
+            tutorialDialog.show(supportFragmentManager, "optionDialog")
+        }
+        if (presentMoney=="") {
+            presentMoney="0"
+        }
+        setMoneyText((presentMoney?.toInt()!! + personalMoney).toString())
+        setLevelText(level!!)
+        initEvent()
+        mainCharacterMove(470f, -550f)
+        loadSavedCharacterAndMove()
 
-            setMoneyText((presentMoney?.toInt()!! + personalMoney).toString())
-            setLevelText(level!!)
-            initEvent()
-            mainCharacterMove(470f, -550f)
-            loadSavedCharacterAndMove()
+        // 각 쓰레드 생성 및 시작
+        quizTimeThread = Thread(QuizTimer())
+        quizTimeThread.start()
 
-            // 각 쓰레드 생성 및 시작
-            quizTimeThread = Thread(QuizTimer())
-            quizTimeThread.start()
+        annualMoneyThread = Thread(AnnualMoneyThread())
+        annualMoneyThread.start()
 
-            annualMoneyThread = Thread(AnnualMoneyThread())
-            annualMoneyThread.start()
+        val thread = Thread(PlayTime())
+        thread.start()
 
-            val thread = Thread(PlayTime())
-            thread.start()
-            }
         // 잔디 프리퍼런스 초기화
         grassPref = getSharedPreferences("fragmentPlayTime", 0)
         grassPrefEditor = grassPref.edit()
