@@ -1,15 +1,21 @@
 package com.example.raise_developer
 
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
+import com.apollographql.apollo3.api.http.HttpRequest
+import com.apollographql.apollo3.api.http.HttpResponse
+import com.apollographql.apollo3.network.http.HttpInterceptor
+import com.apollographql.apollo3.network.http.HttpInterceptorChain
 import com.example.graphqlsample.queries.GithubCommitQuery
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -17,6 +23,7 @@ import com.google.firebase.auth.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.oAuthCredential
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -27,14 +34,61 @@ class LoginActivity: AppCompatActivity() {
 
     val auth = Firebase.auth
     //파이어 스토어 함수
-    var presentLV=0
+    val db = FirebaseFirestore.getInstance()
     var jsonData = ""
-    var level = ""
+    var level = "1"
     var presentMoney = ""
-    var tutorialCehck = false
+    var tutorialCheck = false
+
+    //    깃허브 정보
+    var githubContributionData: List<GithubCommitQuery.Week>? = null
+    val token = BuildConfig.GITHUB_TOKEN
+    val apolloClient = ApolloClient.builder()
+        .addHttpInterceptor(AuthorizationInterceptor("${token}"))
+        .serverUrl("https://api.github.com/graphql")
+        .build()
+
+    inner class AuthorizationInterceptor(val token: String) : HttpInterceptor {
+        override suspend fun intercept(
+            request: HttpRequest,
+            chain: HttpInterceptorChain
+        ): HttpResponse {
+            return chain.proceed(
+                request.newBuilder().addHeader("Authorization", "Bearer $token").build()
+            )
+        }
+    }
 
     companion object {
         lateinit var prefs: PreferenceInventory
+    }
+
+    var myService : MyService? = null
+    var isConService = false
+    val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
+            Log.d("서비스","실행됨")
+            val b = p1 as MyService.LocalBinder
+            isConService = true
+            myService = b.getService()
+            myService?.githubInfoActivityToService(githubContributionData)
+        }
+
+        override fun onServiceDisconnected(p0: ComponentName?) {
+            isConService = false
+        }
+    }
+    fun serviceBind() {
+        val bindService = Intent(this, MyService::class.java)
+//        startService(Intent(this, MyService::class.java))
+        bindService(bindService, serviceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    fun serviceUnBind() {
+        if (isConService) {
+            unbindService(serviceConnection)
+            isConService = false
+        }
     }
 
     suspend fun checkData(userId: String): DocumentSnapshot? {
@@ -58,16 +112,14 @@ class LoginActivity: AppCompatActivity() {
             "level" to "1",
             "jsonString" to ""
         )
-        FireStore.db.collection("user").document(userId).set(
+        db.collection("user").document(userId).set(
             user
         ).await()
-        FireStore.tutorialCehck = true
+        tutorialCheck = true
         prefs.prefs.edit().clear().apply()
     }
 
     fun readData(data: DocumentSnapshot, prefs: SharedPreferences, userId: String) {
-        var jsonData = ""
-        var level = ""
         var dataSet = data.data.toString().split("uID=")[1].split(",")
         var presentId = dataSet[0]
         var jsonDataSet = data.data.toString().split("uID=")[1].split("jsonString=")
@@ -78,22 +130,26 @@ class LoginActivity: AppCompatActivity() {
                     jsonChanger[0] + "}]}"
             }
             level = dataSet[2].replace("\\s".toRegex(), "").split("=")[1]
-            FireStore.presentMoney = dataSet[1].replace("\\s".toRegex(), "").split("=")[1]
+            presentMoney = dataSet[1].replace("\\s".toRegex(), "").split("=")[1]
         }
         prefs.edit().putString("inventory", jsonData).apply()
-        prefs.edit().putString("money", FireStore.presentMoney).apply()
+        prefs.edit().putString("money", presentMoney).apply()
         prefs.edit().putString("level", level).apply()
+    }
+
+    suspend fun updateData(userId: String){
         val user = hashMapOf(
             "money" to presentMoney,
             "level" to level,
             "jsonString" to jsonData
         )
-        FireStore.db.collection("user").document(userId).update(user as Map<String, Any>)
+        FireStore.db.collection("user").document(userId).update(user as Map<String, Any>).await()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login_page)
+        prefs = PreferenceInventory(this)
         initEvent()
     }
 
@@ -101,6 +157,7 @@ class LoginActivity: AppCompatActivity() {
 //        로그인버튼
         val loginBtn=findViewById<TextView>(R.id.login_btn)
         val progressBar = findViewById<ProgressBar>(R.id.login_page_progrss_bar)
+        val githubIcon = findViewById<ImageView>(R.id.login_page_github_icon)
         val continueBtn = findViewById<TextView>(R.id.continue_btn)
         progressBar.max = 100
         loginBtn.setOnClickListener{
@@ -112,26 +169,57 @@ class LoginActivity: AppCompatActivity() {
                         .addOnCompleteListener(this@LoginActivity) {task ->
                             if(task.isSuccessful) {
                                 loginBtn.visibility = View.INVISIBLE
+                                githubIcon.visibility = View.INVISIBLE
                                 progressBar.visibility = View.VISIBLE
+
                                 val userEmail = Firebase.auth.currentUser?.email
                                 val userId = authResult.additionalUserInfo?.username.toString() // 유저의 아이디
+
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    //파이어스토어 정보 받아오기
+                                    // 깃허브 정보 받아오기
+                                    val githubResponse: Deferred<ApolloResponse<GithubCommitQuery.Data>> =
+                                        async {
+                                            apolloClient.query(GithubCommitQuery(userId))
+                                                .execute()
+                                        }
+                                    githubContributionData =
+                                        githubResponse.await().data?.user?.contributionsCollection?.contributionCalendar?.weeks
+                                    Log.d("깃허브 ㄱ끝","2")
+                                    progressBar.progress = 30
+
+                                    serviceBind()
+                                    val isService = async { serviceConnection }
+                                    isService.await()
+                                    Log.d("바인드","됨?")
+                                    progressBar.progress = 60
+
                                     val checkData = checkData(userId)
                                     if (checkData?.data == null) {
                                         setData(userId)
+                                        progressBar.progress = 90
                                     } else {
                                         readData(checkData, prefs.prefs, userId)
-
+                                        progressBar.progress = 90
+                                        updateData(userId)
                                     }
 
-                                    Log.d("if Login success", userId)
                                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                                     intent.putExtra("userEmail", userEmail)
                                     intent.putExtra("userId", userId) // 유저 아이디 전달
-                                    intent.putExtra("tutorialCheck",tutorialCehck)
-                                    startActivity(intent)
-                                    finish()
+                                    intent.putExtra("tutorialCheck",tutorialCheck)
+                                    intent.putExtra("level",level)
+                                    intent.putExtra("presentMoney",presentMoney)
+
+                                    progressBar.progress = 100
+                                    progressBar.visibility = View.INVISIBLE
+
+                                    continueBtn.visibility = View.VISIBLE
+                                    githubIcon.visibility = View.VISIBLE
+
+                                    continueBtn.setOnClickListener {
+                                        startActivity(intent)
+                                        finish()
+                                    }
                                 }
                             }
                             else {
@@ -146,6 +234,24 @@ class LoginActivity: AppCompatActivity() {
                 )
         }
         }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("onStart","g")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("onResume","g")
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceUnBind()
+        Log.d("onDestroy","g")
+
+    }
 
 
     }

@@ -50,16 +50,18 @@ class MyService : Service() {
 
     override fun onDestroy() {  //서비스 종료
         super.onDestroy()
+        Log.d("서비스 종ㅇ료","ㅠ")
         player?.release()
         player = null
     }
 
-    fun githubInfoMainActivityToService(data: List<GithubCommitQuery.Week>?){
+    fun githubInfoActivityToService(data: List<GithubCommitQuery.Week>?){
         githubContributionData = data
-        Log.d("MainActivityToService","${githubContributionData}")
+        Log.d("ActivityToService","${githubContributionData}")
     }
 
-    fun githubInfoServiceToGrassPage() : List<GithubCommitQuery.Week>? {
+    fun githubInfoServiceToActivity() : List<GithubCommitQuery.Week>? {
+        Log.d("ServiceToActivity","${githubContributionData}")
         return githubContributionData
     }
 

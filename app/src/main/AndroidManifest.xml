@@ -22,7 +22,7 @@
             android:stopWithTask="false" />
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,8 +32,8 @@
         </activity>
         <activity android:name=".GrassPageActivity" />
         <activity android:name=".RankingActivity" />
-        <activity android:name=".LoginActivity" />
         <activity android:name=".MainActivity" />
+        <activity android:name=".SplashActivity" />
 <!--        <activity android:name=".ScreenSlidePagerActivity"/>-->
     </application>
 

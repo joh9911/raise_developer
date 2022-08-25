@@ -66,7 +66,7 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
             val bindSer = async { serviceBind() }
             bindSer.await()
             Log.d("바인드실행","시작")
-            val getGithubData = async{githubData = myService?.githubInfoServiceToGrassPage()}
+            val getGithubData = async{githubData = myService?.githubInfoServiceToActivity()}
             getGithubData.await()
             Log.d("깃허브","시작")
             val divide = async { divideGithubDataInfo() }

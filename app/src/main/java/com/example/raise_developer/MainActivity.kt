@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
 
     // 개인 자산 관련
     var personalMoney = 0  // 개인 자산
+    var userId = "" //유저 아이디
     override fun setPersonalMoneyLogic(PersonalMoney: Int) {
         personalMoney = PersonalMoney
         findViewById<TextView>(R.id.main_page_text_view_personal_money).text = "${personalMoney}만원"
@@ -330,6 +331,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
                     repeatCount = ValueAnimator.INFINITE
                     repeatMode = ValueAnimator.REVERSE
                     myService?.musicStart()
+
                     start()
                 }
             }
@@ -514,17 +516,17 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         soundId = soundPool.load(this, R.raw.typing_sound, 1)
     }
 
-
     // 서비스
     var myService : MyService? = null
     var isConService = false
     val serviceConnection = object : ServiceConnection{
         override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-            Log.d("서비스","실행됨")
+            Log.d("메인서비스","실행됨")
             val b = p1 as MyService.LocalBinder
             myService = b.getService()
             isConService = true
-            myService?.githubInfoMainActivityToService(githubContributionData)
+            val githubDa = myService?.githubInfoServiceToActivity()
+            Log.d("github","${githubDa}")
         }
 
         override fun onServiceDisconnected(p0: ComponentName?) {
@@ -561,6 +563,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     //잔디버튼 이벤트
     fun btnEventGrass() {
         val grassBtn = findViewById<ImageButton>(R.id.grass_btn)
+
         grassBtn.setOnClickListener {
             val intent= Intent(this,GrassPageActivity::class.java)
             intent.putExtra("playTime",playTime)
@@ -608,7 +611,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     fun btnEventOption() {
         val optionButton = findViewById<ImageView>(R.id.main_page_button_option)
         optionButton.setOnClickListener {
-            val id = intent.getStringExtra("userId") // 로그인 페이지로부터 유저 아이디 받아오기
             val email = intent.getStringExtra("userEmail")
             val optionDialog = OptionDialog(email!!)
             optionDialog.setBgmOnButtonEvent(object : OptionDialog.BgmOnButtonClickListener {
@@ -707,73 +709,18 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     fun btnEventInformation() {
         val personalInformationButton = findViewById<ImageButton>(R.id.private_btn)
         personalInformationButton.setOnClickListener {
-            val pIDialog = PersonalDialog(setAnnualMoney(),touchMoney,userLv,userID)
+            val pIDialog = PersonalDialog(setAnnualMoney(),touchMoney,userLv,userId!!)
             pIDialog.show(supportFragmentManager, "personalInformationDialog")
         }
     }
     //파이어 스토어 함수
-    var userID="test qwe123rqw"
     var money = personalMoney.toString()
     var presentLV=0
-    suspend fun checkData(userId: String): DocumentSnapshot? {
-        Log.d("체크데이터", "실행")
-        return try {
-            val data = db.collection("user").document(userId)   // 작업할 컬렉션
-                .get()   // 문서 가져오기
-                .await()
-            Log.d("체크데이터","${data.data}")
-            data
-        } catch (e: Exception) {
-            Log.d("checkdata0","실패")
-            null
-        }
-    }
-
-    suspend fun setData(userId: String) {
-        val jsonString = ""
-        val level = "1"
-        val user = hashMapOf(
-            "uID" to userId,
-            "money" to money,
-            "level" to level,
-            "jsonString" to jsonString
-        )
-        db.collection("user").document(userId).set(
-            user
-        ).await()
-        tutorialCehck = true
-        prefs.prefs.edit().clear().apply()
-    }
-
-    fun readData(data: DocumentSnapshot, prefs: SharedPreferences, userId: String) {
-        var jsonData = ""
-        var level = ""
-        var dataSet = data.data.toString().split("uID=")[1].split(",")
-        var presentId = dataSet[0]
-        var jsonDataSet = data.data.toString().split("uID=")[1].split("jsonString=")
-        var jsonChanger = jsonDataSet[1].split("}]}")
-        if (presentId == userId) {
-            if (jsonChanger[0] != "}") {
-                jsonData =
-                    jsonChanger[0] + "}]}"
-            }
-            level = dataSet[2].replace("\\s".toRegex(), "").split("=")[1]
-            presentMoney = dataSet[1].replace("\\s".toRegex(), "").split("=")[1]
-        }
-        prefs.edit().putString("inventory", jsonData).apply()
-        prefs.edit().putString("money", presentMoney).apply()
-        prefs.edit().putString("level", level).apply()
-        val user = hashMapOf(
-            "money" to presentMoney,
-            "level" to level,
-            "jsonString" to jsonData
-        )
-        db.collection("user").document(userId).update(user as Map<String, Any>)
-    }
 
     //생명주기
     override fun onStart() {
         super.onStart()
+        Log.d("onStart","g")
         isThreadStop = false
         isAnimationThreadStop = false
         setTypingSound()
@@ -782,45 +729,28 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startService(Intent(this, LifecycleService::class.java))
-        val id = intent.getStringExtra("userId") // 로그인 페이지로부터 유저 아이디 받아오기
-        userID = id!!
+        userId = intent.getStringExtra("userId")!!
         prefs = PreferenceInventory(this)
         CoroutineScope(Dispatchers.Main).launch {
-            Log.d("tlwkr","시작")
-            //깃허브 정보 받아오기
-            val githubResponse: Deferred<ApolloResponse<GithubCommitQuery.Data>> =
-                async {
-                    apolloClient.query(GithubCommitQuery(userID))
-                        .execute()
-                }
-            githubContributionData =
-                githubResponse.await().data?.user?.contributionsCollection?.contributionCalendar?.weeks
-
-            Log.d("깃허브","끝")
             // 서비스 바인드
             serviceBind()
-
-            //파이어스토어 정보 받아오기
-            val checkData = checkData(userID)
-            if (checkData?.data == null){
-                setData(userID)
-            }
-            else {
-                readData(checkData, prefs.prefs, userID)
-            }
-            Log.d("파아ㅣ어스토어","끝")
+            Log.d("서비스 실행","ㅎ")
             setContentView(R.layout.main_page)
+            val tutorialCheck = intent.getBooleanExtra("tutorialCheck",false)
+            var presentMoney = intent.getStringExtra("presentMoney")
+            val level = intent.getStringExtra("level")
 
-            if (tutorialCehck) {
+            if (tutorialCheck) {
                 val tutorialDialog = TutorialDialog()
                 tutorialDialog.show(supportFragmentManager, "optionDialog")
-                tutorialCehck=false
             }
+
             if (presentMoney=="") {
                 presentMoney="0"
             }
-            setMoneyText((presentMoney.toInt() + personalMoney).toString())
-            setLevelText(FireStore.level)
+
+            setMoneyText((presentMoney?.toInt()!! + personalMoney).toString())
+            setLevelText(level!!)
             initEvent()
             mainCharacterMove(470f, -550f)
             loadSavedCharacterAndMove()
@@ -844,6 +774,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
 
     override fun onResume() {
         super.onResume()
+        Log.d("onResume","g")
         isThreadStop = false
         isAnimationThreadStop = false
     }
@@ -864,8 +795,8 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         grassPrefEditor.clear().apply()
         money=personalMoney.toString()
         Log.d("현재머니",money)
-        presentLV=userLv
-        sendjsonString(userID,presentLV.toString(),money,prefs.prefs)
+        presentLV = userLv
+        sendjsonString(userId!!, presentLV.toString(), money, prefs.prefs)
         prefs.prefs.edit().clear().apply()
     }
 }
