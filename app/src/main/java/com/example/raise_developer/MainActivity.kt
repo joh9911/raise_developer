@@ -528,7 +528,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             val githubDa = myService?.githubInfoServiceToActivity()
             Log.d("github","${githubDa}")
         }
-
         override fun onServiceDisconnected(p0: ComponentName?) {
             isConService = false
         }

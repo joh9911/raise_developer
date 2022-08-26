@@ -80,7 +80,6 @@ class LoginActivity: AppCompatActivity() {
     }
     fun serviceBind() {
         val bindService = Intent(this, MyService::class.java)
-//        startService(Intent(this, MyService::class.java))
         bindService(bindService, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
@@ -188,12 +187,10 @@ class LoginActivity: AppCompatActivity() {
                                     progressBar.progress = 30
 
                                     serviceBind()
-                                    val isService = async { serviceConnection }
-                                    isService.await()
-                                    Log.d("바인드","됨?")
-                                    progressBar.progress = 60
 
                                     val checkData = checkData(userId)
+                                    progressBar.progress = 60
+
                                     if (checkData?.data == null) {
                                         setData(userId)
                                         progressBar.progress = 90
@@ -235,24 +232,12 @@ class LoginActivity: AppCompatActivity() {
         }
         }
 
-    override fun onStart() {
-        super.onStart()
-        Log.d("onStart","g")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("onResume","g")
-
-    }
 
     override fun onDestroy() {
         super.onDestroy()
         serviceUnBind()
         Log.d("onDestroy","g")
-
     }
 
-
-    }
+}
 
