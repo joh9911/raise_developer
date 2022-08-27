@@ -16,12 +16,14 @@ class MyService : Service() {
     val binder = LocalBinder()
 
     override fun onBind(intent: Intent): IBinder {
+        Log.d("서비스 온바인드","1")
         return binder
     }
 
     override fun onCreate() {
         super.onCreate()
         player = MediaPlayer.create(this,R.raw.music)
+        Log.d("서비스 온크레이트","1")
     }
 
     inner class LocalBinder : Binder() {
@@ -31,12 +33,18 @@ class MyService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("서비스 온바인드","1")
         return START_NOT_STICKY
+
     }
 
     fun musicStop(){ //음악 멈추기
         player?.release()
         player = null
+    }
+
+    fun musicPause(){
+        player?.pause()
     }
 
     fun musicStart(){ //음악 재생

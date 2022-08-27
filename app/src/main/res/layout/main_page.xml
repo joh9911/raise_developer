@@ -166,6 +166,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
+        android:id="@+id/main_page_piano_linear_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@mipmap/piano"
@@ -197,12 +198,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.85"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/main_page_piano_linear_layout"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.42"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <TextView
             android:id="@+id/main_page_sound_director_name"
@@ -215,8 +214,8 @@
 
         <ImageView
             android:id="@+id/main_page_sound_director_image_view"
-            android:layout_width="30dp"
-            android:layout_height="26dp"
+            android:layout_width="39dp"
+            android:layout_height="36dp"
             android:layout_gravity="center"
             android:src="@mipmap/character1" />
     </LinearLayout>

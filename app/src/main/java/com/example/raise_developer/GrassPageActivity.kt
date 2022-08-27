@@ -49,6 +49,7 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
     }
     override fun onStart() {
         super.onStart()
+        OnStopChecker().activityStarted()
     }
 
     override fun onReceivedMoney(Money: Int) {

@@ -193,7 +193,7 @@ class LoginActivity: AppCompatActivity() {
 
                                     if (checkData?.data == null) {
                                         setData(userId)
-                                        progressBar.progress = 90
+                                        progressBar.progress = 70
                                     } else {
                                         readData(checkData, prefs.prefs, userId)
                                         progressBar.progress = 90
@@ -230,8 +230,7 @@ class LoginActivity: AppCompatActivity() {
                     }
                 )
         }
-        }
-
+    }
 
     override fun onDestroy() {
         super.onDestroy()

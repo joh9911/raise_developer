@@ -712,9 +712,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             pIDialog.show(supportFragmentManager, "personalInformationDialog")
         }
     }
-    //파이어 스토어 함수
-    var money = personalMoney.toString()
-    var presentLV=0
+
 
     //생명주기
     override fun onStart() {
@@ -722,6 +720,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         Log.d("onStart","g")
         isThreadStop = false
         isAnimationThreadStop = false
+        OnStopChecker().activityStarted()
         setTypingSound()
     }
 
@@ -772,26 +771,33 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         Log.d("onResume","g")
         isThreadStop = false
         isAnimationThreadStop = false
+        if(OnStopChecker().applicationStatusChecker()){
+            if(myService?.player?.isPlaying != null){
+                myService?.musicStart()
+            }
+        }
     }
 
     override fun onStop() {
         super.onStop()
         Log.d("activity","onstop")
-
+        isThreadStop = true
+        isAnimationThreadStop = true
+        // 홈버튼 눌렀을 때
+        if(OnStopChecker().applicationStatusChecker()){
+            if(myService?.player?.isPlaying != null){
+                myService?.musicPause()
+            }
+        }
+        OnStopChecker().activityStopped()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d("activity","destory")
         serviceUnBind()
-        isThreadStop = true
-        isAnimationThreadStop = true
-
         grassPrefEditor.clear().apply()
-        money=personalMoney.toString()
-        Log.d("현재머니",money)
-        presentLV = userLv
-        sendjsonString(userId!!, presentLV.toString(), money, prefs.prefs)
+        sendjsonString(userId!!, userLv.toString(), personalMoney.toString(), prefs.prefs)
         prefs.prefs.edit().clear().apply()
     }
 }
