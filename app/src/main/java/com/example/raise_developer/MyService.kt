@@ -14,7 +14,7 @@ class MyService : Service() {
     var player: MediaPlayer? = null
 
     val binder = LocalBinder()
-
+//gkgk
     override fun onBind(intent: Intent): IBinder {
         Log.d("서비스 온바인드","1")
         return binder
