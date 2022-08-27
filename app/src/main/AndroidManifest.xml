@@ -35,6 +35,7 @@
         <activity android:name=".RankingActivity" />
         <activity android:name=".MainActivity" />
         <activity android:name=".SplashActivity" />
+
 <!--        <activity android:name=".ScreenSlidePagerActivity"/>-->
     </application>
 

@@ -69,7 +69,6 @@ class GrassInfoDialog(date: String, contributionCount: String, grassColor: Strin
         progressBar = view.findViewById(R.id.grass_info_dialog_progress_bar)
         progressBarValue = view.findViewById(R.id.grass_info_dialog_progress_bar_value)
         progressBar.max = maxValue
-        Log.d("grassinfo","${maxValue}")
         if (maxValue != 0){
             val thread = Thread(PlayTime())
             thread.start()
@@ -92,7 +91,7 @@ class GrassInfoDialog(date: String, contributionCount: String, grassColor: Strin
     inner class PlayTime(): Runnable {
         override fun run() {
             while (!isThreadStop) {
-                Log.d("grassInfo","${playTime}")
+//                Log.d("grassInfo","${playTime}")
 
                 activity?.runOnUiThread {
                     if (playTime >= maxValue){

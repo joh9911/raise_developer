@@ -49,7 +49,9 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
     }
     override fun onStart() {
         super.onStart()
-        OnStopChecker().activityStarted()
+        OnStopChecker.instance!!.activityStarted()
+        val thread = Thread(PlayTime())
+        thread.start()
     }
 
     override fun onReceivedMoney(Money: Int) {
@@ -78,15 +80,15 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
 
     override fun onResume() {
         super.onResume()
-        val thread = Thread(PlayTime())
-        thread.start()
+
     }
 
     inner class PlayTime: Runnable {
         override fun run() {
             playTime = intent.getIntExtra("playTime",0)
+            Log.d("글래스액티비티인텐트값","${intent.getIntExtra("playTime",0)}")
             while (!isThreadStop) {
-                Log.d("grassActivity","${playTime}")
+//                Log.d("grassActivity","${playTime}")
                 playTime+=1
                 Thread.sleep(1000)
             }
@@ -151,8 +153,11 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
         setResult(RESULT_OK, intent)
         finish()
 
-//        intent.putExtra("grassMoney",grassMoney)
-//        setResult(RESULT_OK,intent)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        OnStopChecker.instance!!.activityStopped()
     }
 
     override fun onDestroy() {

@@ -189,7 +189,7 @@
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/fragment_view_pager.xml" value="0.1375" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/grass_check_page.xml" value="0.4" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/grass_info_dialog.xml" value="0.2" />
-        <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/grass_page.xml" value="0.6" />
+        <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/grass_page.xml" value="0.2" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/grass_page_custom_view.xml" value="0.264" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/grass_page_view_pager_layout.xml" value="0.2526041666666667" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/grass_shop_custom_view.xml" value="0.22826086956521738" />
@@ -212,6 +212,7 @@
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/quiz_dialog_result_right.xml" value="0.2526041666666667" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/quiz_dialog_result_wrong.xml" value="0.2526041666666667" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/ranking_page.xml" value="0.2" />
+        <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/ranking_page_custom_view.xml" value="0.10416666666666667" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/shop_custom_view.xml" value="0.25" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/shop_dialog.xml" value="0.25" />
         <entry key="..\:/Users/joh9911/Desktop/joh9911/stageus/raise_developer/app/src/main/res/layout/shop_dialog_employ.xml" value="0.4" />

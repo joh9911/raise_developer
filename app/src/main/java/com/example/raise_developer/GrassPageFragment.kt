@@ -34,7 +34,6 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
         fun onReceivedMoney(Money: Int)
     }
 
-
     // 해당 월의 날짜 정보 및 잔디 정보
     var numberOfDateArray = ArrayList<String>()
     var grassColorArray = ArrayList<String>()
@@ -54,8 +53,10 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
         gridLayoutSetting(view)
         pref = requireActivity().getSharedPreferences("fragmentPlayTime",0)
         editor = pref.edit()
+        Log.d("grassPageFragment${position}","${playTime}")
+        // 프리퍼런스 값이 있으면
         if(pref.getInt("fragment${position}",-1) != -1){
-            Log.d("첫단계","${pref.getInt("fragment${position}",0)}")
+            Log.d("첫단계${position}","${pref.getInt("fragment${position}",0)}")
             playTime -= pref.getInt("fragment${position}",0)
         }
         val thread = Thread(PlayTime())
@@ -84,7 +85,7 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
 
     inner class PlayTime: Runnable {
         override fun run() {
-            Log.d("grassFragment${position}","${playTime}")
+//            Log.d("grassFragment${position}","${playTime}")
             while (!isThreadStop) {
 
                 playTime+=1
@@ -172,25 +173,28 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
             for (index in 0 until numberOfDateArray.size){
                 if (grassMaxValue[index] != 0){
                     Log.d("수확버튼","${playTime}")
-                    if (playTime*1000 >= grassMaxValue[index]) {
+                    if (playTime >= grassMaxValue[index]) {
                         grassHarvestMoney += grassMaxValue[index]
                         fragmentToActivityGrassMoney.onReceivedMoney(grassHarvestMoney)
                     }
                     else{
-                        grassHarvestMoney += playTime*1000
+                        grassHarvestMoney += playTime
                         fragmentToActivityGrassMoney.onReceivedMoney(grassHarvestMoney)
                     }
                 }
             }
             if (pref.getInt("fragment${position}",-1) == -1){
-                Log.d("프리퍼런서 있냐","${playTime}")
+                Log.d("프리퍼런서 없음","${playTime}")
                 editor.putInt("fragment${position}",playTime).apply()
                 playTime = 0
             }
             else{
-                Log.d("프리퍼런서 없냐","${playTime}")
+                Log.d("프리퍼런서 있음","${playTime}")
+                val pastPreferenceValue = pref.getInt("fragment${position}",-1)
                 editor.remove("fragment${position}").apply()
-                editor.putInt("fragment${position}",playTime).apply()
+                Log.d("프리퍼런스 지웠음","${pref.getInt("fragment${position}",-1)}")
+                editor.putInt("fragment${position}",pastPreferenceValue + playTime).apply()
+                Log.d("다시 등롥함","${pref.getInt("fragment${position}",-1)}")
                 playTime = 0
             }
             for (index in 0 until gridLayout.childCount){

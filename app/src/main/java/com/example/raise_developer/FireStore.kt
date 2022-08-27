@@ -9,7 +9,38 @@ object FireStore {
     var jsonData = ""
     var level = ""
     var presentMoney = ""
-    var tutorialCehck = false
+    var tutorialCheck = false
+    var rankLevelData= mutableListOf<Array<String>>()
+    var rankMoneyData= mutableListOf<Array<String>>()
+
+    fun rankData() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val data =db.collection("user")
+                .get()
+            val dataFirst = async {
+                data .addOnSuccessListener { result ->
+                    for (document in result) {
+                        Log.d("TAG", "${document.id} => ${document.data}")
+                        var levelData =
+                            document.data.toString().split("level=")[1].split(",")[0]
+                        var moneyData =
+                            document.data.toString().split("money=")[1].split(",")[0]
+                        val rankLevelDefault = arrayOf(document.id, levelData)
+                        val rankMoneyDefault = arrayOf(document.id, moneyData)
+                        rankMoneyData.add(rankMoneyDefault)
+                        rankLevelData.add(rankLevelDefault)
+                    }
+                }
+                    .addOnFailureListener { exception ->
+                        Log.w("TAG", "Error getting documents.", exception)
+                    }
+            }
+            dataFirst.await()
+            for (index in 0 until rankMoneyData.size){
+                rankMoneyData[index][1]
+            }
+        }
+    }
 
     fun readData(userId: String, prefs: SharedPreferences) {
         CoroutineScope(Dispatchers.Main).launch {
@@ -70,7 +101,7 @@ object FireStore {
             db.collection("user").document(userId).set(
                 user
             )
-            tutorialCehck = true
+            tutorialCheck = true
         }
 
         fun updateData(userId: String, level: String, jsonString: String, money: String) {

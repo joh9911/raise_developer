@@ -26,7 +26,7 @@
         android:textColor="@color/black"
         android:textSize="25dp"
         app:layout_constraintBottom_toBottomOf="@+id/top"
-        app:layout_constraintEnd_toStartOf="@+id/imageView3"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.04"
         app:layout_constraintHorizontal_bias="0.9"
         app:layout_constraintStart_toStartOf="parent"
@@ -106,14 +106,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHeight_percent="0.1"
         />
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/setting2"
-        app:layout_constraintBottom_toTopOf="@+id/topLine"
-        app:layout_constraintEnd_toEndOf="@+id/top"
-        app:layout_constraintTop_toTopOf="@+id/top" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

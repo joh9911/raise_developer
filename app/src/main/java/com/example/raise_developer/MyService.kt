@@ -22,7 +22,6 @@ class MyService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        player = MediaPlayer.create(this,R.raw.music)
         Log.d("서비스 온크레이트","1")
     }
 

@@ -28,7 +28,6 @@ import com.example.raise_developer.FireStore.checkData
 import com.example.raise_developer.FireStore.db
 import com.example.raise_developer.FireStore.presentMoney
 import com.example.raise_developer.FireStore.sendjsonString
-import com.example.raise_developer.FireStore.tutorialCehck
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.ktx.Firebase
@@ -566,6 +565,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         grassBtn.setOnClickListener {
             val intent= Intent(this,GrassPageActivity::class.java)
             intent.putExtra("playTime",playTime)
+            Log.d("그래스버튼","${playTime}")
             getResultText.launch(intent)
         }
     }
@@ -720,7 +720,10 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         Log.d("onStart","g")
         isThreadStop = false
         isAnimationThreadStop = false
-        OnStopChecker().activityStarted()
+        OnStopChecker.instance!!.activityStarted()
+        if(myService?.player?.isPlaying != null){
+            myService?.musicStart()
+        }
         setTypingSound()
     }
 
@@ -769,32 +772,26 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     override fun onResume() {
         super.onResume()
         Log.d("onResume","g")
-        isThreadStop = false
-        isAnimationThreadStop = false
-        if(OnStopChecker().applicationStatusChecker()){
-            if(myService?.player?.isPlaying != null){
-                myService?.musicStart()
-            }
-        }
+
     }
 
     override fun onStop() {
         super.onStop()
         Log.d("activity","onstop")
-        isThreadStop = true
-        isAnimationThreadStop = true
         // 홈버튼 눌렀을 때
-        if(OnStopChecker().applicationStatusChecker()){
+        OnStopChecker.instance!!.activityStopped()
+        if(OnStopChecker.instance!!.applicationStatusChecker()){
             if(myService?.player?.isPlaying != null){
                 myService?.musicPause()
             }
         }
-        OnStopChecker().activityStopped()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d("activity","destory")
+        isThreadStop = true
+        isAnimationThreadStop = true
         serviceUnBind()
         grassPrefEditor.clear().apply()
         sendjsonString(userId!!, userLv.toString(), personalMoney.toString(), prefs.prefs)
