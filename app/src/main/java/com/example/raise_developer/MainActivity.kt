@@ -260,8 +260,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     }
 
     //애니메이션
-    var characterCustomViewArray = arrayListOf<View>()
-    var characterCustomViewNameArray = arrayListOf<String>()
+    var isSoundDriectorHere = false // 바인드 서비스가 매우 늦어서 soundDi 함수에서 음악 실행이 안됨 사운드 디렉터가 있으면 true로 하고 서비스 연결 뒤 체크 후 음악 실행
     fun mainCharacterMove(positionX: Float, positionY: Float) { // 내 캐릭터의 애니메이션
         val character = findViewById<LinearLayout>(R.id.main_page_character)
         val characterName = findViewById<TextView>(R.id.main_page_character_name)
@@ -325,12 +324,12 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             val pianoNoteMark = findViewById<ImageView>(R.id.piano_music_note)
             pianoNoteMark.visibility = View.VISIBLE
             ObjectAnimator.ofFloat(pianoNoteMark, "translationY", 15f)
-                .apply { // x축 이동
+                .apply {
+                    Log.d("사운드 디렑터","음표 움직임")
                     duration = 800
                     repeatCount = ValueAnimator.INFINITE
                     repeatMode = ValueAnimator.REVERSE
-                    myService?.musicStart()
-
+                    isSoundDriectorHere = true
                     start()
                 }
             }
@@ -525,6 +524,9 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             myService = b.getService()
             isConService = true
             val githubDa = myService?.githubInfoServiceToActivity()
+            if (isSoundDriectorHere){
+                myService?.musicStart()
+            }
             Log.d("github","${githubDa}")
         }
         override fun onServiceDisconnected(p0: ComponentName?) {

@@ -62,8 +62,7 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.grass_page)
-        findViewById<ImageView>(R.id.imageView3).setOnClickListener {
-        }
+
         CoroutineScope(Dispatchers.Main).launch {
             Log.d("tlwkr","시작")
             val bindSer = async { serviceBind() }

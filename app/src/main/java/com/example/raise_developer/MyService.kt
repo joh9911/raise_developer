@@ -14,7 +14,7 @@ class MyService : Service() {
     var player: MediaPlayer? = null
 
     val binder = LocalBinder()
-//gkgk
+
     override fun onBind(intent: Intent): IBinder {
         Log.d("서비스 온바인드","1")
         return binder
@@ -22,6 +22,9 @@ class MyService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        if (player?.isPlaying == null){
+            player = MediaPlayer.create(this,R.raw.music)
+        }
         Log.d("서비스 온크레이트","1")
     }
 

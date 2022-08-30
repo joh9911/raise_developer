@@ -11,7 +11,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.*
+import androidx.core.view.marginTop
 import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -110,18 +112,27 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
     fun gridLayoutSetting(view: View) {
         divideGithubDataInfo() // 각각 배열의 size는 8월이면 31, 2월이면 28, 이렇게 저장되어 있을 것임
         val gridLayout = view.findViewById<GridLayout>(R.id.gridLayout)
+
+
         for (index in 0 until numberOfDateArray.size) {
 
             var maxValue = 0
             val customView = layoutInflater.inflate(R.layout.grass_page_custom_view,gridLayout,false)
             val grassImage = customView.findViewById<ImageView>(R.id.grass)
             val coinImage = customView.findViewById<ImageView>(R.id.coin)
-            val param = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT)
+            if (numberOfDateArray.size < 7){
+                
+            }
+            else{
+                val param = GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED,1f),GridLayout.spec(GridLayout.UNDEFINED,1f))
 
-            param.setMargins(7*getDeviceDpi()/320) // 현 dpi 기준 7픽셀을 기준으로 잡음
-            customView.layoutParams = param
+//            val param = LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.WRAP_CONTENT,
+//                LinearLayout.LayoutParams.WRAP_CONTENT)
+
+//            param.setMargins(7*getDeviceDpi()/320) // 현 dpi 기준 7픽셀을 기준으로 잡음
+                customView.layoutParams = param
+            }
 
             ObjectAnimator.ofFloat(coinImage, "translationY", -15f).apply {
                 duration = 800
@@ -172,7 +183,6 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
         harvestCoinButton.setOnClickListener {
             for (index in 0 until numberOfDateArray.size){
                 if (grassMaxValue[index] != 0){
-                    Log.d("수확버튼","${playTime}")
                     if (playTime >= grassMaxValue[index]) {
                         grassHarvestMoney += grassMaxValue[index]
                         fragmentToActivityGrassMoney.onReceivedMoney(grassHarvestMoney)
@@ -184,17 +194,13 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
                 }
             }
             if (pref.getInt("fragment${position}",-1) == -1){
-                Log.d("프리퍼런서 없음","${playTime}")
                 editor.putInt("fragment${position}",playTime).apply()
                 playTime = 0
             }
             else{
-                Log.d("프리퍼런서 있음","${playTime}")
                 val pastPreferenceValue = pref.getInt("fragment${position}",-1)
                 editor.remove("fragment${position}").apply()
-                Log.d("프리퍼런스 지웠음","${pref.getInt("fragment${position}",-1)}")
                 editor.putInt("fragment${position}",pastPreferenceValue + playTime).apply()
-                Log.d("다시 등롥함","${pref.getInt("fragment${position}",-1)}")
                 playTime = 0
             }
             for (index in 0 until gridLayout.childCount){
