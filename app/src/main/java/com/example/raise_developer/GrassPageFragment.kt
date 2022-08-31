@@ -121,7 +121,7 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
             val grassImage = customView.findViewById<ImageView>(R.id.grass)
             val coinImage = customView.findViewById<ImageView>(R.id.coin)
             if (numberOfDateArray.size < 7){
-                
+
             }
             else{
                 val param = GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED,1f),GridLayout.spec(GridLayout.UNDEFINED,1f))
