@@ -754,6 +754,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         mainCharacterMove(470f, -550f)
         loadSavedCharacterAndMove()
 
+
         // 각 쓰레드 생성 및 시작
         quizTimeThread = Thread(QuizTimer())
         quizTimeThread.start()
@@ -767,6 +768,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
         // 잔디 프리퍼런스 초기화
         grassPref = getSharedPreferences("fragmentPlayTime", 0)
         grassPrefEditor = grassPref.edit()
+        grassPrefEditor.clear().apply() // 그 프로세스 종료로 프로그램 종료하면 destroy 때 초기화 안됨
 
         setActivityResultInit()
         }

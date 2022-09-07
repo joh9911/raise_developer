@@ -41,14 +41,14 @@ class LoginActivity: AppCompatActivity() {
     var tutorialCheck = false
 
     //    깃허브 정보
-    var githubContributionData: List<GithubCommitQuery.Week>? = null
-    val token = BuildConfig.GITHUB_TOKEN
+    var githubContributionData: List<GithubCommitQuery.Week>? = null // 깃허브 정보를 받으려는 변수
+    val token = BuildConfig.GITHUB_TOKEN // 나의 깃허브 토큰
     val apolloClient = ApolloClient.builder()
         .addHttpInterceptor(AuthorizationInterceptor("${token}"))
         .serverUrl("https://api.github.com/graphql")
         .build()
 
-    inner class AuthorizationInterceptor(val token: String) : HttpInterceptor {
+    inner class AuthorizationInterceptor(val token: String) : HttpInterceptor { // 인증을 도와주는 클래스
         override suspend fun intercept(
             request: HttpRequest,
             chain: HttpInterceptorChain

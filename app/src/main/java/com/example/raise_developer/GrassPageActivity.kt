@@ -95,7 +95,7 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
     }
 
     fun divideGithubDataInfo(){
-        for(index in 0 until githubData?.size!!){
+        for(index in 0 until githubData?.size!!){ // week 배열의 사이즈
             for (index1 in 0 until githubData?.get(index)?.contributionDays?.size!!){
                 var date = githubData?.get(index)?.contributionDays?.get(index1)?.date.toString()
                 var dateArray = date.split("-")
