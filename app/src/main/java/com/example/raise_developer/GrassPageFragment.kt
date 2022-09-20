@@ -20,15 +20,19 @@ import androidx.fragment.app.FragmentManager
 import com.example.graphqlsample.queries.GithubCommitQuery
 
 class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCommitQuery.Week>?, playTime: Int, position:Int): Fragment() {
-    val position = position
     lateinit var pref: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
+
+    val position = position
+    var grassMaxValue = arrayListOf<Int>()
     var grassHarvestMoney = 0
+
     var githubDataArray = githubDataArray // grassPageActivity 에서 해당 페이지의 날짜 정보 배열을 가져옴 (22,08,12) 이런식으로
     var githubData = githubData //깃허브 정보
     var playTime = playTime
+
     var isThreadStop = false
-    var grassMaxValue = arrayListOf<Int>()
+
 
     lateinit var fragmentToActivityGrassMoney: FragmentToActivityGrassMoney
 
@@ -55,10 +59,8 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
         gridLayoutSetting(view)
         pref = requireActivity().getSharedPreferences("fragmentPlayTime",0)
         editor = pref.edit()
-        Log.d("grassPageFragment${position}","${playTime}")
         // 프리퍼런스 값이 있으면
         if(pref.getInt("fragment${position}",-1) != -1){
-            Log.d("첫단계${position}","${pref.getInt("fragment${position}",0)}")
             playTime -= pref.getInt("fragment${position}",0)
         }
         val thread = Thread(PlayTime())
@@ -87,9 +89,7 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
 
     inner class PlayTime: Runnable {
         override fun run() {
-//            Log.d("grassFragment${position}","${playTime}")
             while (!isThreadStop) {
-
                 playTime+=1
                 Thread.sleep(1000)
             }
@@ -163,7 +163,7 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
 
             }
 
-            customView.setOnClickListener { // 클릭하면 잔디 상점 다이알로그 띄움
+            customView.setOnClickListener { // 클릭하면 잔디 정보 다이알로그 띄움
                 val grassInfoDialog = GrassInfoDialog(numberOfDateArray[index], contributionCountArray[index], grassColorArray[index], playTime)
                 grassInfoDialog.show(parentFragmentManager,"grassShopDialog")
             }

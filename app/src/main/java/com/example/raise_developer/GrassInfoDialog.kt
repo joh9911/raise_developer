@@ -24,8 +24,6 @@ class GrassInfoDialog(date: String, contributionCount: String, grassColor: Strin
     var isThreadStop = false
     lateinit var progressBar: ProgressBar
     lateinit var progressBarValue: TextView
-    lateinit var harvestButtonClickListener: HarvestButtonClickListener
-
 
     var date = date
     var contributionCount = contributionCount
@@ -75,18 +73,12 @@ class GrassInfoDialog(date: String, contributionCount: String, grassColor: Strin
         }
         return view
     }
-    interface HarvestButtonClickListener{
-        fun harvestMoney(playTime: Int)
-    }
 
     override fun onResume() {
         super.onResume()
         context?.dialogFragmentResize(this, 0.7f,0.5f) // 다이알로그 크기 조정
     }
 
-    fun setDialogListener(listener: HarvestButtonClickListener){ // 인터페이스의 함수 초기화
-        harvestButtonClickListener = listener
-    }
 
     inner class PlayTime(): Runnable {
         override fun run() {

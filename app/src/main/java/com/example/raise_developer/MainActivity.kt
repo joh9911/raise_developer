@@ -248,9 +248,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     fun setActivityResultInit(){
         getResultText = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
             if(result.resultCode == RESULT_OK){
-                Log.d("mainActivityresult","result")
                 val data = result.data?.getIntExtra("grassMoney",0)
-                Log.d("data","${data}")
                 grassMoney = data!!
                 personalMoney += grassMoney
                 findViewById<TextView>(R.id.main_page_text_view_personal_money).text =

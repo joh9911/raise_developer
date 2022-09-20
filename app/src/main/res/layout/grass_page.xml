@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/top"
+        android:id="@+id/grass_page_top"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/dark_green"
@@ -25,7 +25,7 @@
         android:text="0원"
         android:textColor="@color/black"
         android:textSize="25dp"
-        app:layout_constraintBottom_toBottomOf="@+id/top"
+        app:layout_constraintBottom_toBottomOf="@+id/grass_page_top"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.04"
         app:layout_constraintHorizontal_bias="0.9"
@@ -33,14 +33,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.5" />
     <ImageView
-        android:id="@+id/imageView4"
+        android:id="@+id/grass_page_grass_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:src="@mipmap/grass_icon"
-        app:layout_constraintBottom_toTopOf="@+id/topLine"
+        app:layout_constraintBottom_toTopOf="@+id/grass_page_topLine"
         app:layout_constraintEnd_toStartOf="@+id/text_linear"
         app:layout_constraintHorizontal_bias="0.1"
-        app:layout_constraintStart_toStartOf="@+id/top"
+        app:layout_constraintStart_toStartOf="@+id/grass_page_top"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.1" />
     <LinearLayout
@@ -48,9 +48,9 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/topLine"
+        app:layout_constraintBottom_toTopOf="@+id/grass_page_topLine"
         app:layout_constraintEnd_toStartOf="@+id/grass_page_money_value"
-        app:layout_constraintStart_toEndOf="@+id/imageView4"
+        app:layout_constraintStart_toEndOf="@+id/grass_page_grass_image"
         app:layout_constraintTop_toTopOf="parent">
         <TextView
             android:id="@+id/grass_page_year_text"
@@ -74,20 +74,20 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/topLine"
+        android:id="@+id/grass_page_topLine"
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/top"
+        app:layout_constraintTop_toBottomOf="@id/grass_page_top"
         />
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/grass_page_view_pager2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/dark_yellow"
-        app:layout_constraintBottom_toTopOf="@+id/bot"
+        app:layout_constraintBottom_toTopOf="@+id/grass_page_bottom"
         app:layout_constraintHeight_percent="0.8"
-        app:layout_constraintTop_toBottomOf="@+id/top"
+        app:layout_constraintTop_toBottomOf="@+id/grass_page_top"
         tools:layout_editor_absoluteX="0dp" >
     </androidx.viewpager2.widget.ViewPager2>
 
@@ -99,7 +99,7 @@
         app:layout_constraintTop_toBottomOf="@id/grass_page_view_pager2"
         />
     <TextView
-        android:id="@+id/bot"
+        android:id="@+id/grass_page_bottom"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/bright_green"

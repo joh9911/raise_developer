@@ -46,12 +46,12 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
         override fun onServiceDisconnected(p0: ComponentName?) {
             isConService = false
         }
+
     }
     override fun onStart() {
         super.onStart()
         OnStopChecker.instance!!.activityStarted()
-        val thread = Thread(PlayTime())
-        thread.start()
+
     }
 
     override fun onReceivedMoney(Money: Int) {
@@ -63,31 +63,24 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
         super.onCreate(savedInstanceState)
         setContentView(R.layout.grass_page)
 
+        val thread = Thread(PlayTime())
+        thread.start()
+
         CoroutineScope(Dispatchers.Main).launch {
-            Log.d("tlwkr","시작")
             val bindSer = async { serviceBind() }
             bindSer.await()
-            Log.d("바인드실행","시작")
             val getGithubData = async{githubData = myService?.githubInfoServiceToActivity()}
             getGithubData.await()
-            Log.d("깃허브","시작")
             val divide = async { divideGithubDataInfo() }
             divide.await()
-            Log.d("깃허브","나누기")
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-    }
 
     inner class PlayTime: Runnable {
         override fun run() {
             playTime = intent.getIntExtra("playTime",0)
-            Log.d("글래스액티비티인텐트값","${intent.getIntExtra("playTime",0)}")
             while (!isThreadStop) {
-//                Log.d("grassActivity","${playTime}")
                 playTime+=1
                 Thread.sleep(1000)
             }
@@ -115,7 +108,6 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
         viewPager.adapter = pagerAdapter
         viewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback(){
             override fun onPageSelected(position: Int) {
-                Log.d("onPageSelected","${position}")
                 super.onPageSelected(position)
                 val yearText = findViewById<TextView>(R.id.grass_page_year_text)
                 val monthText = findViewById<TextView>(R.id.grass_page_month_text)
@@ -124,6 +116,7 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
             }
         })
     }
+
     inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
 
         override fun getItemCount(): Int = githubDataArray.size
@@ -145,13 +138,10 @@ class GrassPageActivity: FragmentActivity(),GrassPageFragment.FragmentToActivity
     }
 
     override fun onBackPressed() {
-//        super.onBackPressed()
-        Log.d("뒤로가기","버튼")
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("grassMoney", grassMoney)
         setResult(RESULT_OK, intent)
         finish()
-
     }
 
     override fun onStop() {
