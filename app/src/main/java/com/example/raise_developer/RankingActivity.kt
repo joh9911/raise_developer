@@ -71,9 +71,16 @@ class RankingActivity: AppCompatActivity() {
 
     fun selectionSort(data: MutableList<Array<String>>):MutableList<Array<String>> {
         var v =data
+
         for (i in 0 until v.size - 1) {
             var tmp = i
             for (j in i + 1 until v.size) {
+                if(v[tmp][1] == ""){
+                    v[tmp][1] = "0"
+                }
+                if(v[j][1] == ""){
+                    v[j][1] = "0"
+                }
                 if (v[tmp][1].toInt() <= v[j][1].toInt()) tmp = j
             }
             var x=v[i]

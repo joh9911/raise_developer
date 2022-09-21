@@ -21,14 +21,17 @@ class TutorialDialog: DialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.tutorial_dialog,container,false)
-        var bgColors = arrayListOf(
-            R.color.background_color,
-            R.color.deep_green,
+        var tutorialPage = arrayListOf(
+            "tutorial1",
+            "tutorial2",
+            "tutorial3",
+            "tutorial4",
+            "tutorial5",
         )
 
         val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)
         val dotIndicator = view.findViewById<DotsIndicator>(R.id.spring_dots_indicator)
-        viewPager.adapter = TutorialRecyclerAdapter(bgColors)
+        viewPager.adapter = TutorialRecyclerAdapter(tutorialPage)
 
         viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
 

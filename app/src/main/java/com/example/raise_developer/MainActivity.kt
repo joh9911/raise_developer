@@ -533,6 +533,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     }
     fun serviceBind() {
         val bindService = Intent(this, MyService::class.java)
+        startService(Intent(this, MyService::class.java))
         bindService(bindService, serviceConnection, Context.BIND_AUTO_CREATE)
     }
     fun serviceUnBind() {
@@ -730,7 +731,6 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_page)
-        startService(Intent(this, LifecycleService::class.java))
         userId = intent.getStringExtra("userId")!!
         prefs = PreferenceInventory(this)
         serviceBind()
@@ -792,6 +792,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
     override fun onDestroy() {
         super.onDestroy()
         Log.d("activity","destory")
+        Toast.makeText(this, "mainDestroy ", Toast.LENGTH_SHORT).show()
         isThreadStop = true
         isAnimationThreadStop = true
         serviceUnBind()
