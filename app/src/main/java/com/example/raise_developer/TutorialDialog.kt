@@ -22,11 +22,11 @@ class TutorialDialog: DialogFragment() {
     ): View? {
         val view = inflater.inflate(R.layout.tutorial_dialog,container,false)
         var tutorialPage = arrayListOf(
-            "tutorial1",
-            "tutorial2",
-            "tutorial3",
-            "tutorial4",
-            "tutorial5",
+            R.mipmap.tutorial1,
+            R.mipmap.tutorial2,
+            R.mipmap.tutorial3,
+            R.mipmap.tutorial4,
+            R.mipmap.tutorial5
         )
 
         val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)

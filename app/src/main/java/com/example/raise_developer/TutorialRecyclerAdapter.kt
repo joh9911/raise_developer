@@ -14,21 +14,14 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 
-class TutorialRecyclerAdapter(private val tutorialPage: ArrayList<String>) : RecyclerView.Adapter<TutorialRecyclerAdapter.PagerViewHolder>() {
+class TutorialRecyclerAdapter(private val tutorialPage: ArrayList<Int>) : RecyclerView.Adapter<TutorialRecyclerAdapter.PagerViewHolder>() {
 
     inner class PagerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val tutorialImage: ImageView = itemView.findViewById(R.id.tutorialImage)
 
         fun bind(position: Int) {
-            when (position) {
-                0 -> tutorialImage.setImageResource(R.mipmap.tutorial1)
-                1 -> tutorialImage.setImageResource(R.mipmap.tutorial2)
-                2 -> tutorialImage.setImageResource(R.mipmap.tutorial3)
-                3 -> tutorialImage.setImageResource(R.mipmap.tutorial4)
-                4 -> tutorialImage.setImageResource(R.mipmap.tutorial5)
-            }
-
+            tutorialImage.setImageResource(tutorialPage[position])
         }
     }
 
