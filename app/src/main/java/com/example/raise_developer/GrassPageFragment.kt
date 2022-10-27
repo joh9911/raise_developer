@@ -171,15 +171,21 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
         }
         val harvestCoinButton = view.findViewById<Button>(R.id.harvestCoinButton)
         harvestCoinButton.setOnClickListener {
+            Log.d("클릭했을 때","${playTime}")
             for (index in 0 until numberOfDateArray.size){
                 if (grassMaxValue[index] != 0){
                     if (playTime >= grassMaxValue[index]) {
                         grassHarvestMoney += grassMaxValue[index]
+                        Log.d("playtime이 max 넘었을 때","${grassHarvestMoney}")
                         fragmentToActivityGrassMoney.onReceivedMoney(grassHarvestMoney)
+                        grassHarvestMoney = 0
                     }
                     else{
                         grassHarvestMoney += playTime
+                        Log.d("안넘었을 때","${grassHarvestMoney}")
+
                         fragmentToActivityGrassMoney.onReceivedMoney(grassHarvestMoney)
+                        grassHarvestMoney = 0
                     }
                 }
             }
@@ -215,7 +221,9 @@ class GrassPageFragment(githubDataArray: List<String>, githubData: List<GithubCo
                     start()
                 }
             }
+            Log.d("로직 나중에","${playTime}")
         }
+
     }
 
     override fun onDestroy() {

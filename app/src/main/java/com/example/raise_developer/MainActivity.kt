@@ -328,6 +328,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
                     repeatCount = ValueAnimator.INFINITE
                     repeatMode = ValueAnimator.REVERSE
                     isSoundDriectorHere = true
+                    myService?.musicStart()
                     start()
                 }
             }
@@ -523,6 +524,7 @@ class MainActivity : AppCompatActivity(), QuizInterface, LevelUpInterface {
             isConService = true
             val githubDa = myService?.githubInfoServiceToActivity()
             if (isSoundDriectorHere){
+                Log.d("음악디렉터 여기 있음","음악실행")
                 myService?.musicStart()
             }
             Log.d("github","${githubDa}")
