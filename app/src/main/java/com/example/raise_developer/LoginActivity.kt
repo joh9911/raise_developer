@@ -224,13 +224,16 @@ class LoginActivity: AppCompatActivity() {
                         }
                     }
                 )
-                .addOnFailureListener(
-                    OnFailureListener {
-                        Toast.makeText(this,"Error", Toast.LENGTH_LONG).show()
-                    }
-                )
+                .addOnFailureListener{ e ->
+                    val i = findViewById<TextView>(R.id.mainBot)
+                    i.setText("해당 앱의")
+                    Toast.makeText(this,"${e}", Toast.LENGTH_LONG).show()
+                    loginBtn.setText("오류")
+                }
         }
-    }
+
+        }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -239,4 +242,5 @@ class LoginActivity: AppCompatActivity() {
     }
 
 }
+
 
