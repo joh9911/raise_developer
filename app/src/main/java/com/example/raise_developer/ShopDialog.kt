@@ -208,7 +208,6 @@ class ShopDialog(personalMoney: Int) : DialogFragment() {
                     )
                     customViewButtonText.text = "구매완료"
                     purchaseCheck = true
-                    Toast.makeText(context, "구매성공", Toast.LENGTH_SHORT).show()
                     customViewLevelPresentText.text= employLevel[index].toString()
 
                 }
@@ -235,7 +234,6 @@ class ShopDialog(personalMoney: Int) : DialogFragment() {
                     )
                     customViewButtonText.text = "구매완료"
                     purchaseCheck = true
-                    Toast.makeText(context, "구매성공", Toast.LENGTH_SHORT).show()
                     customViewLevelPresentText.text= employLevel[index].toString()
                 }
                 else {

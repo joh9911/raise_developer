@@ -226,8 +226,7 @@ class LoginActivity: AppCompatActivity() {
                 )
                 .addOnFailureListener{ e ->
                     val i = findViewById<TextView>(R.id.mainBot)
-                    i.setText("해당 앱의")
-                    Toast.makeText(this,"${e}", Toast.LENGTH_LONG).show()
+                    i.setText("해당 앱의 캐시를 지워주세요")
                     loginBtn.setText("오류")
                 }
         }
