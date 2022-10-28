@@ -24,6 +24,16 @@ class RankingActivity: AppCompatActivity() {
         ititData()
     }
 
+    override fun onStart() {
+        super.onStart()
+        OnStopChecker.instance!!.activityStarted()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        OnStopChecker.instance!!.activityStopped()
+    }
+
     var rankLevelData= mutableListOf<Array<String>>()
     var rankMoneyData= mutableListOf<Array<String>>()
 

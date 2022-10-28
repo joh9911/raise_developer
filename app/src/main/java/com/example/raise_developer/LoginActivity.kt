@@ -231,9 +231,7 @@ class LoginActivity: AppCompatActivity() {
                     loginBtn.setText("오류")
                 }
         }
-
         }
-
 
     override fun onDestroy() {
         super.onDestroy()
