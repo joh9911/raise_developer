@@ -18,7 +18,7 @@
 
 
 
-제가 만드는 동안 어려웠던 부분들은 블로그에 정리중에 있습니다.
+만드는 동안 어려웠던 부분들을 블로그에 정리중에 있습니다.
 
 [joh9911_Note](https://joh9911-programming-note.tistory.com/)
 
