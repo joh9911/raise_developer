@@ -20,7 +20,7 @@
 
 만드는 동안 어려웠던 부분들을 블로그에 정리중에 있습니다.
 
-[joh9911_Note]([https://joh9911-programming-note.tistory.com/](https://joh9911-programming-note.tistory.com/category/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/%EA%B0%9C%EB%B0%9C%EC%9E%90%20%ED%82%A4%EC%9A%B0%EA%B8%B0%20%EA%B2%8C%EC%9E%84))
+[joh9911_Note](https://joh9911-programming-note.tistory.com/](https://joh9911-programming-note.tistory.com/category/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/%EA%B0%9C%EB%B0%9C%EC%9E%90%20%ED%82%A4%EC%9A%B0%EA%B8%B0%20%EA%B2%8C%EC%9E%84)
 
 
 ## 실행 화면
